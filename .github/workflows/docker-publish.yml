@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
 
 permissions:
   contents: read
@@ -12,7 +19,15 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
     steps:
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/david49er-lang/skills-publish-docker-images/stackoverflown   
+
       - uses: actions/checkout@v6
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -30,6 +45,7 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ghcr.io/david49er-lang/skills-publish-docker-images/stackoverflown:main
-            ghcr.io/david49er-lang/skills-publish-docker-images/stackoverflown:${{ github.sha }}
+          tags: ${{ steps.meta.outputs.tags }}
+
+
+         
